@@ -1,19 +1,22 @@
 package com.dragonjam.game.creatures;
 
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Polygon;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 public abstract class Mob extends Actor {
 
     Sprite sprite;
+    Polygon hitbox;
 
     public abstract void place(float worldWidth, float worldHeight);
 
     Mob() {
         sprite = new Sprite();
         sprite.setSize(2.5f, 2.5f * (5f / 3f));
+        hitbox = new Polygon();
+        hitbox.
     }
 
     void resizeBounds() {

@@ -4,8 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 import com.dragonjam.game.controllers.DrownerController;
 import com.dragonjam.game.controllers.GameManager;
 import com.dragonjam.game.utility.View;
@@ -23,7 +21,7 @@ public class Drowner extends Mob {
     private boolean stopped;
 
     public Drowner(boolean rightSide) {
-        sprite.setTexture(new Texture("images/sprites/eating.png"));
+        sprite.setTexture(new Texture("img/sprites/drowner/eating.png"));
         resizeBounds();
         speed = 0.4f + GameManager.getInstance().rand().nextInt(21) / 100f;
         stopPos = View.WIDTH.val() / 2;
@@ -44,10 +42,13 @@ public class Drowner extends Mob {
     public void updatePosition() {
         if (stopped) return;
 
-        if ((!right && sprite.getX() > stopPos) || (right && (sprite.getX() < stopPos)))
+        if ((!right && sprite.getX() > stopPos) || (right && (sprite.getX() < stopPos))) {
             stopped = true;
-        else
+            hitbox = DrownerController.eating;
+        } else {
             sprite.translateX(speed * Gdx.graphics.getDeltaTime());
+            hitbox = DrownerController.walking;
+        }
     }
 
     @Override

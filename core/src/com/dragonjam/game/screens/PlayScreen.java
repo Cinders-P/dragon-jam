@@ -54,7 +54,7 @@ public class PlayScreen implements Screen {
 		stage = new Stage(viewport, batch);
 		
 		System.out.println("initializing textures...");
-		bg = new Sprite(new Texture(Gdx.files.internal("images/background.png")));
+		bg = new Sprite(new Texture(Gdx.files.internal("img/background.png")));
 		
 		System.out.println("creating player...");
 		dc = new DrownerController();

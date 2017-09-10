@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 public class Boy extends Mob {
 
     public Boy() {
-        sprite.setTexture(new Texture("images/sprites/boy.png"));
+        sprite.setTexture(new Texture("img/sprites/boy/idle.png"));
         resizeBounds();
     }
 
