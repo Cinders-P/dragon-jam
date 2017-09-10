@@ -8,16 +8,20 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.dragonjam.game.creatures.PlayerWhole;
-import com.dragonjam.game.utility.Constants;
+import com.dragonjam.game.controllers.DrownerController;
+import com.dragonjam.game.creatures.Boy;
+import com.dragonjam.game.creatures.Girl;
+import com.dragonjam.game.creatures.Mob;
 import com.dragonjam.game.utility.View;
 
 public class PlayScreen implements Screen {
 	
 	private Stage stage;
+	private DrownerController dc;
 		
 	// ---- Viewing / camera objects ----
 	OrthographicCamera cam;
@@ -27,35 +31,40 @@ public class PlayScreen implements Screen {
 	// ---- Textures ----
 	// This will be the bg of the game
 	private Sprite bg;
-	
-	// ---- Creatures ----
-	PlayerWhole player;
+	private Boy boy;
+	private Girl girl;
 	
 	/**
 	 * libGDX object for the main play aspect
 	 * of the game. This screen will handle
 	 * rendering and updating / the game loop.
 	 * 
-	 * @param source
+	 * @param batch
 	 * the SpriteBatch that will be used for drawing
 	 * 
 	 * @author Rane
 	 */
-	public PlayScreen(SpriteBatch source) {
+	public PlayScreen(SpriteBatch batch) {
 				
 		System.out.println("setting up render components...");
 		cam = new OrthographicCamera();
 		viewport = new StretchViewport(View.WIDTH.val(),
 		                               View.HEIGHT.val(),
 		                               cam);
-		stage = new Stage(viewport, source);
+		stage = new Stage(viewport, batch);
 		
 		System.out.println("initializing textures...");
-		bg = new Sprite(new Texture(Gdx.files.internal("images/background.png")));
+		bg = new Sprite(new Texture(Gdx.files.internal("img/background.png")));
 		
 		System.out.println("creating player...");
-		player = new PlayerWhole();
-		
+		dc = new DrownerController();
+		stage.addActor(new Girl());
+		stage.addActor(new Boy());
+		stage.addActor(dc.newDrowner());
+		stage.addActor(dc.newDrowner());
+		stage.addActor(dc.newDrowner());
+		stage.addActor(dc.newDrowner());
+		stage.addActor(dc.newDrowner());
 	}
 	
 	/**
@@ -69,6 +78,8 @@ public class PlayScreen implements Screen {
 	 * @author Rane
 	 */
 	private void update(float delta) {
+
+		dc.updateDrowners();
 		
 		// TODO: Use zoom??
 //		if(InputHandler.scroll > 0) {
@@ -81,7 +92,7 @@ public class PlayScreen implements Screen {
 		
 		cam.update();
 		
-		player.update(delta);
+		// player.update(delta);
 		
 		//System.out.println(InputHandler.lastClick);
 		
@@ -100,37 +111,15 @@ public class PlayScreen implements Screen {
 		
 		// Then render
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		
 		stage.getBatch().setProjectionMatrix(cam.combined);
+
 		stage.getBatch().begin();
-		
-		// Draw back ground
+		// Draw background
 		bg.draw(stage.getBatch());
-		
-		// Draw player-controlled creatures
-		// Attacker
-//		stage.getBatch().draw(player.getAttackerTexture(), 
-//				(Constants.W_WIDTH / 2) - (player.getAttackerTexture().getRegionWidth() * cam.zoom / 3 / 2) + player.getAttacker().getLocation().x, 
-//				(Constants.W_HEIGHT / 2) - (player.getAttackerTexture().getRegionWidth() * cam.zoom / 2.5f / 2) - (Constants.W_HEIGHT * 0.05f), 
-//				player.getAttackerTexture().getRegionWidth() * cam.zoom / 3, player.getAttackerTexture().getRegionHeight() * cam.zoom / 2.5f);
-//		// Fisher
-//		stage.getBatch().draw(player.getFisherTexture(), 
-//				(Constants.W_WIDTH / 2) - (player.getFisherTexture().getRegionWidth() * cam.zoom / 3 / 2), 
-//				(Constants.W_HEIGHT / 2) - (player.getFisherTexture().getRegionHeight() * cam.zoom / 2.5f / 2) - (Constants.W_HEIGHT * 0.08f), 
-//				player.getAttackerTexture().getRegionWidth() * cam.zoom / 3, player.getAttackerTexture().getRegionHeight() * cam.zoom / 2.5f);
-		// Draw the player components
-		stage.getBatch().draw(player.getAttackerTexture(), 
-				(Constants.W_WIDTH / 2) - (100 / 2) + player.getAttacker().getLocation().x, 
-				(Constants.W_HEIGHT / 2) - (200 / 2) - (Constants.W_HEIGHT * 0.05f), 
-				100, 200);
-		// Fisher
-		stage.getBatch().draw(player.getFisherTexture(), 
-				(Constants.W_WIDTH / 2) - (100 / 2), 
-				(Constants.W_HEIGHT / 2) - (200 / 2) - (Constants.W_HEIGHT * 0.08f), 
-				100, 200);
-		
 		stage.getBatch().end();
-		
+
+		// Draw actors
+		stage.draw();
 	}
 
 	/**
@@ -148,7 +137,7 @@ public class PlayScreen implements Screen {
 		View.RATIO.setVal((float) height / width);
 		viewport.setWorldSize(View.WIDTH.val(), View.HEIGHT.val());
 		viewport.update(width, height, true);
-		placeBackground();
+		updateSpritePositions();
 	}
 
 	@Override
@@ -169,28 +158,49 @@ public class PlayScreen implements Screen {
 	@Override
 	public void dispose() {
 		bg.getTexture().dispose();
+		for (Actor a : stage.getActors()) {
+			((Mob) a).getSprite().getTexture().dispose();
+		}
 	}
 
 	/**
-	 * Repositions the background in the center whenever the screen is resized.
-	 * The background will always be set large enough to completely cover the
-	 * viewport. If the width is relatively wide, moves the camera down
+	 * Repositions all the textures in the screen.
+	 * If the width is relatively wide, moves the camera down
 	 * 2 world units so that water is always visible.
 	 *
 	 * @author Cinders-P
 	 */
 
-	private void placeBackground() {
-		float imgRatio = 16f / 9f;
+	private void updateSpritePositions() {
+		float height = View.HEIGHT.val();
+		float width = View.WIDTH.val();
 
-		if (View.RATIO.val() > imgRatio)
-			bg.setSize(View.HEIGHT.val() * (1 / imgRatio), View.HEIGHT.val());
-		else
-			bg.setSize(View.WIDTH.val(), View.WIDTH.val() * imgRatio);
-
-		bg.setCenter(View.WIDTH.val() / 2, View.HEIGHT.val() / 2);
+		resizeBackground(width, height);
+		for (Actor a : stage.getActors())
+			((Mob) a).place(width, height);
 		if (View.RATIO.val() <= 4f / 3f)
 			cam.translate(0, -2);
 	}
-	
+
+	/**
+	 * Updates the background to the center whenever the screen is resized.
+	 * The background will always be set large enough to completely cover the
+	 * viewport.
+	 *
+	 * @param width             the new worldWidth
+	 * @param height            the new worldHeight
+	 *
+	 * @author Cinders-P
+	 */
+
+	private void resizeBackground(float width, float height) {
+		float imgRatio = 16f / 9f;
+
+		if (View.RATIO.val() > imgRatio)
+			bg.setSize(height * (1 / imgRatio), height);
+		else
+			bg.setSize(width, width * imgRatio);
+
+		bg.setCenter(width / 2, height / 2);
+	}
 }
