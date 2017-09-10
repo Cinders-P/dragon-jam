@@ -2,17 +2,18 @@ package com.dragonjam.game.creatures;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+import com.dragonjam.game.controllers.DrownerController;
 import com.dragonjam.game.controllers.GameManager;
 import com.dragonjam.game.utility.View;
 
 public class Drowner extends Mob {
 
-    private Animation walkAnimation;
     private float runningTime;
+    private float stopPos;
     private float speed;
 
     /**
@@ -25,26 +26,24 @@ public class Drowner extends Mob {
         sprite.setTexture(new Texture("images/sprites/eating.png"));
         resizeBounds();
         speed = 0.4f + GameManager.getInstance().rand().nextInt(21) / 100f;
+        stopPos = View.WIDTH.val() / 2;
+
 
         if (rightSide) {
             right = true;
             speed = -speed;
+            stopPos -=  0.8f;
             sprite.flip(true, false);
             sprite.setPosition(View.WIDTH.val(), View.HEIGHT.val() / 2 - 2.5f);
         } else {
+            stopPos -= 3.1f;
             sprite.setPosition(-sprite.getWidth(), View.HEIGHT.val() / 2 - 2.5f);
         }
-
-        walkAnimation = new Animation(
-                1f / 5f,
-                new TextureAtlas("images/sprites/drowner.atlas").getRegions()
-        );
     }
 
     public void updatePosition() {
         if (stopped) return;
 
-        float stopPos = View.WIDTH.val() / 2  + (right ? -0.8f : -3.1f);
         if ((!right && sprite.getX() > stopPos) || (right && (sprite.getX() < stopPos)))
             stopped = true;
         else
@@ -57,7 +56,7 @@ public class Drowner extends Mob {
             super.draw(batch, parentAlpha);
         } else {
             runningTime += Gdx.graphics.getDeltaTime();
-            TextureRegion next = (TextureRegion) walkAnimation
+            TextureRegion next = (TextureRegion) DrownerController.WALK
                     .getKeyFrame(runningTime, true);
             if (right) {
                 batch.draw(next, sprite.getX() + sprite.getWidth(), sprite.getY(), -sprite

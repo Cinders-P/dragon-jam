@@ -14,7 +14,6 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.dragonjam.game.controllers.DrownerController;
 import com.dragonjam.game.creatures.Boy;
-import com.dragonjam.game.creatures.Drowner;
 import com.dragonjam.game.creatures.Girl;
 import com.dragonjam.game.creatures.Mob;
 import com.dragonjam.game.utility.View;
